@@ -28,6 +28,24 @@ def main_web():
             deeper_web(u, 'armor', sp[-1])
 
 
+def armor_get(url, category, thing):
+    source = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(source, 'lxml')
+    table = soup.table
+    table_rows = table.find_all('tr')
+    for tr in table_rows:
+        td = tr.find_all('td')
+        for t in td:
+            a = t.find_all('a', style=True)
+            for aa in a:
+                # print(aa['href'])
+                # 每個防具細部的url
+                each_armor_url = "https://mhw.poedb.tw/" + aa['href']
+                print(each_armor_url)
+
+
+
+
 def deeper_web(url, category, thing):
     # headers = {
     #     'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'}
@@ -38,21 +56,24 @@ def deeper_web(url, category, thing):
     soup2 = BeautifulSoup(source, 'lxml')
     # 一定要有lxml 不然會怪怪的
     # print(res.text)
-    weapon_and_armor_dict = {}
     table = soup2.table
-    print(table)
+    # print(table)
     table_rows = table.find_all('tr')
     all_list = []
     for tr in table_rows:
         td = tr.find_all('td')
-        row = [i.text for i in td]
+        # row = [i.text for i in td]
+        # print(tr.contents)
         # print(row)
-        # print('-' * 10)
         temp_list = []
+        # 暫時存所有一個tr的原件
         for t in td:
             # print('-'*10)
             # print(t.text)
             span = t.find_all('span', style=True)
+            # img = t.find_all('img', style=True)
+            # for i in img:
+            #     print(i['style'])
             # print(len(span))
             Sharpness = []
             allfull_Sharpness = []
@@ -73,19 +94,24 @@ def deeper_web(url, category, thing):
                 temp_list.append(t.text)
         all_list.append(temp_list)
     # print(all_list)
+    # save(thing, category, all_list)
+
+
+def save(thing, category, your_list):
     with open('test'+thing+'.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         if category == "weapons":
             writer.writerow(['\ufeff武器', '數值', '屬性技能', '會心', '防禦', '洞數', '斬味', '有匠的斬味'])
         else:
             writer.writerow(['\ufeff防具', '數值', '屬性技能', '會心', '防禦', '洞數', '斬味', '有匠的斬味'])
-        for i in all_list:
+        for i in your_list:
             # print(i)
             writer.writerow(i)
 
+
 if __name__ == '__main__':
     url_first = "https://mhw.poedb.tw/cht/"
-    main_web()
+    # main_web()
     test_url = "https://mhw.poedb.tw/cht/weapons/l_sword"
-    lo_url = "http://www.lottery.gov.cn/historykj/history.jspx?_ltype=plw"
     # deeper_web(test_url)
+    armor_get("https://mhw.poedb.tw/cht/armors/1", "armor", "1")
