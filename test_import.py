@@ -1,5 +1,6 @@
 import to_import
 
+
 def g(y=1):
     return y**2
 
