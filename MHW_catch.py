@@ -11,7 +11,7 @@ def main_web():
         'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'}
     rs = requests.session()
     res = rs.get(url_first, headers=headers)
-    soup = BeautifulSoup(res.text)
+    soup = BeautifulSoup(res.text, 'lxml')
     # print(res.text)
     # print(len(soup.select('a.dropdown-item')))
     weapons_and_armors_url = []
@@ -40,10 +40,45 @@ def bg_get(url, category, thing):
     table = soup.table
 
 
+
 def bow_get(url, category, thing):
     source = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(source, 'lxml')
     table = soup.table
+    table_rows = table.find_all('tr')
+    all_list = []
+    '''
+    for tr in table_rows:
+        td = tr.find_all('td')
+        tmp_list = []
+        for t in td:
+            if not t.find_all('table'):
+                icon_text = ''
+                # print(td.index(t), t.text)
+                all_span = t.find_all('span')
+                count = 0
+                for content in all_span:
+                    img = content.find_all('img')
+                    for img_text in img:
+                        icon = ''.join(re.findall("icon/(.+).png", ''.join(img_text['style'])))
+                        # print(icon_dict[icon])
+                        try:
+                            icon_text = icon_dict[icon]
+                        except KeyError as m:
+                            print(m)
+                                # 如果找不到icon圖片就印出
+                if td.index(t) == 0:
+                    tmp_list.append(icon_text)
+                    tmp_list.append(t.text)
+                elif td.index(t) == 5:
+                    tmp_list.append(icon_text)
+                elif not re.search('\xa0', t.text) and td.index(t) < 6:
+                    tmp_list.append(t.text)
+            all_list.append(tmp_list)
+
+    del all_list[0]
+    print(all_list)
+    save(thing, category, all_list)'''
 
 
 def armor_url_get(url, category, thing):
@@ -60,10 +95,10 @@ def armor_url_get(url, category, thing):
                 # 每個防具細部的url
                 each_armor_url = "https://mhw.poedb.tw/" + aa['href']
                 # print(each_armor_url)
-                armor_get(each_armor_url, thing)
+                armor_get(each_armor_url)
 
 
-def armor_get(url, thing):
+def armor_get(url):
     source = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(source, 'lxml')
     table = soup.table
@@ -99,7 +134,7 @@ def armor_get(url, thing):
             save_list.append(tmp_list)
     name = url.split('/')[-1]
     # print(save_list)
-    save(thing, 'armors', save_list)
+    save(name, 'armors', save_list)
 
 
 def weapon_get(url, category, thing):
@@ -129,7 +164,7 @@ def weapon_get(url, category, thing):
             count = 0
             for content in all_span:
                 try:
-                    print(td.index(t), content['style'])
+                    # print(td.index(t), content['style'])
                     # print(count)
                     cleantext = re.sub('width: ', '', content['style'])
                     cleantext = re.sub(';', '', cleantext)
@@ -187,8 +222,9 @@ if __name__ == '__main__':
                  '249': '充能斧', '250': '操蟲棍', '251': '輕弩', '252': '重弩', '253': '弓'}
     url_first = "https://mhw.poedb.tw/cht/"
     # 首頁
-    # main_web()
+    main_web()
     test_url = "https://mhw.poedb.tw/cht/weapons/l_sword"
-
-    weapon_get(test_url, "weapons", "2")
+    # bow_get("https://mhw.poedb.tw/cht/weapons/lbg", "weapons", "test")
+    # weapon_get(test_url, "weapons", "2")
+    # weapon_get("https://mhw.poedb.tw/cht/weapons/lbg", "weapon", "test")
     # armor_url_get("https://mhw.poedb.tw/cht/armors/8", "armor", "1")
